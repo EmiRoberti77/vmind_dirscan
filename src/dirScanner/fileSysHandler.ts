@@ -13,15 +13,18 @@ export class FileSysScanHandler {
     for await (const dirent of dir) {
       if (!dirent.isFile()) {
         console.log(`[${dirent.name}]`);
+        continue;
       }
-      const filePath = path.join(this.rootDir, "..", "..", dirent.name);
+      const filePath = path.join(this.rootDir, dirent.name);
       console.log(">", filePath);
+      const fileStats = await stat(filePath);
+      console.log(fileStats);
     }
   }
 }
 
 async function main() {
-  const f = new FileSysScanHandler(__dirname);
+  const f = new FileSysScanHandler(path.join(__dirname, "..", ".."));
   await f.scan();
 }
 
