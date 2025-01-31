@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "lib to scan file system based on a route folder",
   "main": "lib/index.js",
+  "types": "lib",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
