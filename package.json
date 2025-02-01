@@ -1,7 +1,7 @@
 {
   "name": "vmind_dir_scan",
-  "version": "1.0.1",
-  "description": "lib to scan file system based on a route folder",
+  "version": "1.0.2",
+  "description": "A library to scan the file system based on a root folder. The library will scan recursively and send a callback for every file and directory it finds, including details such as age, name, path, and size.",
   "main": "lib/index.js",
   "types": "lib",
   "scripts": {
