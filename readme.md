@@ -1,5 +1,19 @@
 # VMind Directory Scanner
 
+![NPM Version](https://img.shields.io/npm/v/my-package)
+![Downloads](https://img.shields.io/npm/dm/my-package)
+![License](https://img.shields.io/npm/l/my-package)
+![TypeScript](https://img.shields.io/badge/TypeScript-%233178C6.svg?style=flat&logo=typescript&logoColor=white)
+![GitHub Actions](https://github.com/my-user/my-repo/actions/workflows/ci.yml/badge.svg)
+
+An awesome package that does amazing things.
+
+## 📦 Installation
+
+````sh
+npm install my-package
+
+
 ## Description
 
 VMind Directory Scanner is a TypeScript/Node.js library that recursively scans a given directory, listing all files and directories while providing metadata such as name, path, size, and age. The library emits events for each file and directory found, allowing real-time processing.
@@ -15,7 +29,7 @@ VMind Directory Scanner is a TypeScript/Node.js library that recursively scans a
 
 ```sh
 npm install vmind-dir-scan
-```
+````
 
 ## Usage
 
