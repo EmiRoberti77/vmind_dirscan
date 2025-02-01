@@ -1,10 +1,6 @@
 # VMind Directory Scanner
 
-![NPM Version](https://img.shields.io/npm/v/my-package)
-![Downloads](https://img.shields.io/npm/dm/my-package)
 ![License](https://img.shields.io/npm/l/my-package)
-![TypeScript](https://img.shields.io/badge/TypeScript-%233178C6.svg?style=flat&logo=typescript&logoColor=white)
-![GitHub Actions](https://github.com/my-user/my-repo/actions/workflows/ci.yml/badge.svg)
 
 An awesome package that does amazing things.
 
