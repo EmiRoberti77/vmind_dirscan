@@ -14,4 +14,5 @@ export type FSEvent = z.infer<typeof fsEventSchema>;
 export enum FS_TYPE {
   FILE = "file",
   DIR = "dir",
+  ERROR = "error",
 }

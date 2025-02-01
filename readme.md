@@ -1,171 +1,73 @@
-# File System Event Scanner
+# VMind Directory Scanner
 
-## Overview
+## Description
 
-This project provides a **recursive file system scanner** that lists all files and directories while efficiently traversing nested folders. It uses **TypeScript**, **Node.js**, and **Zod** for type validation.
-
-The scanner emits events when it encounters files or directories, making it suitable for applications that require file system monitoring, indexing, or clean-up tasks.
-
----
+VMind Directory Scanner is a TypeScript/Node.js library that recursively scans a given directory, listing all files and directories while providing metadata such as name, path, size, and age. The library emits events for each file and directory found, allowing real-time processing.
 
 ## Features
 
-✅ Recursively scans directories  
-✅ Uses **EventEmitter** to trigger events for files and directories  
-✅ Provides **file metadata** (size, age, path, type)  
-✅ Implements **Zod schema validation** for event data  
-✅ Supports **error handling** for invalid paths  
-✅ Optimized for **asynchronous performance** using `for await`
+- Recursively scans directories
+- Emits events for files and directories
+- Provides metadata: name, path, size, age (in days and seconds)
+- Supports error handling via event emission
 
----
+## Installation
 
-## File System Event Type
+```sh
+npm install vmind-dir-scan
+```
 
-The system defines a structured format for file system events using **Zod** schema validation and TypeScript types.
+## Usage
 
-### **`FSEvent` Interface**
+```ts
+import { FileSysScanHandler, FS_TYPE, FSEvent } from "vmind-dir-scan";
 
-```typescript
-import { z } from "zod";
+const scanner = new FileSysScanHandler("/path/to/directory");
 
-const fsEventSchema = z.object({
-  name: z.string().describe("file or dir name"),
-  path: z.string().describe("full path"),
-  type: z.string().describe("file or dir type"),
-  ageInSeconds: z.number().describe("age of file in seconds"),
-  ageInDays: z.number().describe("age of file in days"),
-  size: z.number().describe("file size in MB"),
+scanner.on(FS_TYPE.FILE, (event: FSEvent) => {
+  console.log(`File found: ${event.name}, Size: ${event.size}MB`);
 });
 
-export type FSEvent = z.infer<typeof fsEventSchema>;
-```
-
-**📌 Explanation:**
-
-- **`name`** - The name of the file or directory
-- **`path`** - The full absolute path
-- **`type`** - Either `file` or `dir`
-- **`ageInSeconds`** - File's age in seconds
-- **`ageInDays`** - File's age in days
-- **`size`** - Size of the file (for directories, this is 0)
-
-### **Enum for File System Types**
-
-```typescript
-export enum FS_TYPE {
-  FILE = "file",
-  DIR = "dir",
-}
-```
-
-This enum standardizes file and directory type identifiers.
-
----
-
-## **Recursive File System Scanner**
-
-### **Implementation**
-
-```typescript
-import { EventEmitter } from "events";
-import { opendir, stat } from "fs/promises";
-import * as path from "path";
-import { FSEvent, FS_TYPE } from "./fsEventSchema";
-
-export class FileSysScanHandler extends EventEmitter {
-  rootDir: string;
-
-  constructor(rootDir: string) {
-    super();
-    this.rootDir = rootDir;
-  }
-
-  public async scan(dirPath: string = this.rootDir): Promise<void> {
-    try {
-      const dir = await opendir(dirPath);
-
-      for await (const dirent of dir) {
-        const filePath = path.join(dirPath, dirent.name);
-        const fileStats = await stat(filePath);
-        const ageInSeconds = Math.floor(
-          (Date.now() - fileStats.mtimeMs) / 1000
-        );
-        const ageInDays = Math.floor(ageInSeconds / 86400);
-
-        const fsEvent: FSEvent = {
-          name: dirent.name,
-          path: filePath,
-          type: dirent.isDirectory() ? FS_TYPE.DIR : FS_TYPE.FILE,
-          size: fileStats.size || 0,
-          ageInDays,
-          ageInSeconds,
-        };
-
-        if (dirent.isDirectory()) {
-          this.emit(FS_TYPE.DIR, fsEvent);
-          await this.scan(filePath); // 🔁 Recursively scan subdirectory
-        } else {
-          this.emit(FS_TYPE.FILE, fsEvent);
-        }
-      }
-    } catch (error) {
-      console.error(`Error scanning directory: ${dirPath}`, error);
-    }
-  }
-}
-```
-
-### **Usage Example**
-
-```typescript
-const scanner = new FileSysScanHandler("/your/directory/path");
-
-scanner.on("file", (event) => {
-  console.log(`File found: ${event.path}, Size: ${event.size} bytes`);
+scanner.on(FS_TYPE.DIR, (event: FSEvent) => {
+  console.log(`Directory found: ${event.name}, Path: ${event.path}`);
 });
 
-scanner.on("dir", (event) => {
-  console.log(`Directory found: ${event.path}`);
+scanner.on(FS_TYPE.ERROR, (errorMsg: string) => {
+  console.error(`Error: ${errorMsg}`);
 });
 
 scanner.scan();
 ```
 
----
+## API
 
-## **How It Works**
+### `FileSysScanHandler(rootDir: string)`
 
-1. **Initialises with a root directory**
-2. **Iterates through all files and directories**
-3. **Uses `fs.promises.stat()` to fetch metadata (size, age, etc.)**
-4. **If a directory is found, it recursively scans it**
-5. **Emits `file` or `dir` events when a file or directory is found**
-6. **Supports event-driven handling of files & directories**
-7. **Handles errors gracefully**
+Creates a new instance of the directory scanner.
 
----
+### Events
 
-## **Performance Optimisations**
+- `file`: Emitted when a file is found. Provides an `FSEvent` object.
+- `dir`: Emitted when a directory is found. Provides an `FSEvent` object.
+- `error`: Emitted when an error occurs. Provides an error message.
 
-🚀 **Uses `for await` for efficient iteration over directories**  
-🚀 **Asynchronous `fs.promises` API to prevent blocking**  
-🚀 **Minimal memory footprint - processes one file at a time**  
-🚀 **Leverages EventEmitter for real-time file event processing**
+### FSEvent Object
 
----
+```ts
+interface FSEvent {
+  name: string; // File or directory name
+  path: string; // Full path
+  type: "file" | "dir"; // Type
+  ageInSeconds: number; // Age of file in seconds
+  ageInDays: number; // Age of file in days
+  size: number; // File size in MB
+}
+```
 
-## **Conclusion**
+## License
 
-This **file system scanner** is ideal for **batch processing**, **data indexing**, or **log management**. It efficiently traverses directories **recursively** while collecting and validating file metadata.
+MIT
 
-📌 **To extend functionality, you can:**
+## Author
 
-- Add **filters** (e.g., file extensions, age threshold)
-- Implement **asynchronous batch processing**
-- Store metadata in a **database or cloud storage**
-
----
-
-#### **Author:** Emi Roberti
-
-#### **License:** MIT
+Emi Roberti
