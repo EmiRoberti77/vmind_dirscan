@@ -1,6 +1,6 @@
 # VMind Directory Scanner
 
-![License](https://img.shields.io/npm/l/my-package)
+![TypeScript](https://img.shields.io/badge/TypeScript-%233178C6.svg?style=flat&logo=typescript&logoColor=white)
 
 An awesome package that does amazing things.
 
