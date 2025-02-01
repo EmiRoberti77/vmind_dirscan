@@ -6,9 +6,9 @@ An awesome package that does amazing things.
 
 ## 📦 Installation
 
-````sh
-npm install my-package
-
+```sh
+npm install vmind_dir_scan
+```
 
 ## Description
 
@@ -21,41 +21,44 @@ VMind Directory Scanner is a TypeScript/Node.js library that recursively scans a
 - Provides metadata: name, path, size, age (in days and seconds)
 - Supports error handling via event emission
 
-## Installation
-
-```sh
-npm install vmind-dir-scan
-````
-
 ## Usage
 
+The `FileSysScanHandler` class provides an easy way to iteratively scan a directory tree. You can listen to events to handle files and directories as they are discovered.
+
+### Importing the Library
+
 ```ts
-import { FileSysScanHandler, FS_TYPE, FSEvent } from "vmind-dir-scan";
-
-const scanner = new FileSysScanHandler("/path/to/directory");
-
-scanner.on(FS_TYPE.FILE, (event: FSEvent) => {
-  console.log(`File found: ${event.name}, Size: ${event.size}MB`);
-});
-
-scanner.on(FS_TYPE.DIR, (event: FSEvent) => {
-  console.log(`Directory found: ${event.name}, Path: ${event.path}`);
-});
-
-scanner.on(FS_TYPE.ERROR, (errorMsg: string) => {
-  console.error(`Error: ${errorMsg}`);
-});
-
-scanner.scan();
+import { FileSysScanHandler, FSEvent, FS_TYPE } from "vmind_scan_dir";
 ```
 
-## API
+---
 
-### `FileSysScanHandler(rootDir: string)`
+```ts
+import { FileSysScanHandler, FSEvent, FS_TYPE } from "vmind_scan_dir";
 
-Creates a new instance of the directory scanner.
+// Create an instance of FileSysScanHandler
+const scanner = new FileSysScanHandler("/path/to/start");
 
-### Events
+// Listen for directory events
+scanner.on("FS_TYPE.DIR", (event) => {
+  console.log("Directory found:", event);
+});
+
+// Listen for file events
+scanner.on("FS_TYPE.FILE", (event) => {
+  console.log("File found:", event);
+});
+
+// Listen for errors
+scanner.on("FS_TYPE.ERROR", (error) => {
+  console.error("Error encountered:", error);
+});
+
+// Start the scanning process
+scanner.scanIterative(5).then(() => {
+  console.log("Scanning complete.");
+});
+```
 
 - `file`: Emitted when a file is found. Provides an `FSEvent` object.
 - `dir`: Emitted when a directory is found. Provides an `FSEvent` object.
