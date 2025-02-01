@@ -1,7 +1,7 @@
 import { opendir, stat, unlink } from "fs/promises";
 import { EventEmitter } from "events";
 import path from "path";
-import { FSEvent } from "./model/fsEvents";
+import { FS_TYPE, FSEvent } from "./model/fsEvents";
 
 export class FileSysScanHandler extends EventEmitter {
   rootDir;
@@ -10,36 +10,33 @@ export class FileSysScanHandler extends EventEmitter {
     this.rootDir = rootDir;
   }
 
-  public async scan() {
+  public async scan(dirPath: string = this.rootDir): Promise<void> {
     const now = Date.now();
     const dir = await opendir(this.rootDir);
     for await (const dirent of dir) {
-      if (!dirent.isFile()) {
-        const fsEvent: FSEvent = {
-          name: dirent.name,
-          path: "no path",
-          type: "file",
-          size: 100,
-          ageInDays: 1,
-          ageInSeconds: 1,
-        };
-        this.emit("dir", fsEvent);
-        //console.log(`[${dirent.name}]`);
-        continue;
-      }
       const filePath = path.join(this.rootDir, dirent.name);
-      //console.log(">", filePath);
       const fileStats = await stat(filePath);
-      //console.log(fileStats);
+      const ageInSeconds = Math.floor((Date.now() - fileStats.mtimeMs) / 1000);
+      const ageInDays = Math.floor(ageInSeconds / 86400);
+
       const fsEvent: FSEvent = {
         name: dirent.name,
         path: filePath,
-        type: "file",
-        size: fileStats.size || 100,
-        ageInDays: 1,
-        ageInSeconds: 1,
+        type: dirent.isDirectory() ? FS_TYPE.DIR : FS_TYPE.FILE,
+        size: fileStats.size || 0,
+        ageInDays,
+        ageInSeconds,
       };
-      this.emit("file", fsEvent);
+
+      if (dirent.isDirectory()) {
+        // emit dir stats and call recursevily to scan
+        // files in the directory founf
+        this.emit(FS_TYPE.DIR, fsEvent);
+        await this.scan(filePath);
+      } else {
+        //emit file stats
+        this.emit(FS_TYPE.FILE, fsEvent);
+      }
     }
   }
 }
